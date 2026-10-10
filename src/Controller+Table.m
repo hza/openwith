@@ -59,9 +59,10 @@
         NSString *v = [a valueForKey:col.identifier] ?: @"";
         cell.textField.stringValue = v;
         BOOL dflt = [col.identifier isEqual:@"defaultApp"] && a.isDefault;
-        cell.textField.textColor = dflt ? [NSColor systemGreenColor] : [NSColor labelColor];
+        cell.textField.textColor = dflt ? [NSColor systemGreenColor]
+                                 : IsProtectedAssoc(a) ? [NSColor tertiaryLabelColor] : [NSColor labelColor];
         cell.textField.font = dflt ? [NSFont boldSystemFontOfSize:0] : [NSFont systemFontOfSize:0];
-        cell.toolTip = v;
+        cell.toolTip = IsProtectedAssoc(a) ? @"Protected: reassigning this could break Finder or launching apps" : v;
     }
     return cell;
 }

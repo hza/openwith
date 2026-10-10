@@ -270,6 +270,22 @@ NSArray<Assoc *> *BuildOverview(NSArray<AppEntry *> *apps) {
     }];
 }
 
+BOOL IsProtectedAssoc(Assoc *a) {
+    if (a.scheme) return [a.scheme caseInsensitiveCompare:@"file"] == NSOrderedSame;
+    if (!a.type) return NO;
+    // Exact only: document packages (.pages, .rtfd) conform to these and stay assignable.
+    for (NSString *u in @[@"public.item", @"public.data", @"public.content", @"public.directory", @"com.apple.package",
+                          @"public.executable"])
+        if ([a.type.identifier isEqualToString:u]) return YES;
+    // Not public.executable by conformance: .js/.mjs/.cjs, .exe and .jar conform to it and are fine to reassign.
+    for (NSString *u in @[@"com.apple.application", @"public.unix-executable", @"com.apple.bundle",
+                          @"public.folder", @"public.volume"]) {
+        UTType *p = [UTType typeWithIdentifier:u];
+        if (p && [a.type conformsToType:p]) return YES;
+    }
+    return NO;
+}
+
 // Bundle ID of the app currently handling every one of the given associations, or nil if they differ.
 NSString *SharedDefaultBundleID(NSArray<Assoc *> *items) {
     NSWorkspace *ws = NSWorkspace.sharedWorkspace;

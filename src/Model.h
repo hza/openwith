@@ -54,6 +54,10 @@ NSArray<AppEntry *> *ScanApps(void);
 // One row per extension and URL scheme claimed by any app (shown when no app is selected).
 NSArray<Assoc *> *BuildOverview(NSArray<AppEntry *> *apps);
 
+// Associations that would break Finder or app launching if handed to another app (.app, folders,
+// executables, catch-all types like public.data, the file:// scheme): never reassigned.
+BOOL IsProtectedAssoc(Assoc *a);
+
 // Bundle ID of the app currently handling every one of the given associations, or nil if they differ.
 NSString *SharedDefaultBundleID(NSArray<Assoc *> *items);
 

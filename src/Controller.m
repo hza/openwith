@@ -146,6 +146,7 @@ static NSScrollView *Wrap(NSView *v) {
     [bar addItem:editItem];
     NSMenu *edit = [[NSMenu alloc] initWithTitle:@"Edit"];
     [edit addItemWithTitle:@"Copy" action:@selector(copy:) keyEquivalent:@"c"];
+    [edit addItemWithTitle:@"Select All" action:@selector(selectAll:) keyEquivalent:@"a"];
     [edit addItemWithTitle:@"Find" action:@selector(focusSearch:) keyEquivalent:@"f"];
     editItem.submenu = edit;
 

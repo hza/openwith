@@ -16,9 +16,14 @@ static NSString *const kShowGenericKey = @"ShowGenericHandlers";
 }
 
 - (NSArray<Assoc *> *)transferableSelection {
-    NSArray *sel = [self selectedAssocs];
+    NSArray<Assoc *> *sel = [self selectedAssocs];
+    // In the overview, only rows that share one current default can be reassigned together, so ⌘A
+    // there can't hand every type to one app.
+    if (!self.selectedApp)
+        for (Assoc *a in sel)
+            if (![a.defaultApp isEqualToString:sel[0].defaultApp]) return @[];
     return [sel filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(Assoc *a, id b) {
-        return a.type || a.scheme;
+        return (a.type || a.scheme) && !IsProtectedAssoc(a);  // protected rows are skipped, never assigned
     }]];
 }
 
