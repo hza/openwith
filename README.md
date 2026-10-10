@@ -23,7 +23,7 @@ The app was inspired by [`duti`](https://github.com/moretension/duti). It starte
 - **Generic handlers hidden by default.** Apps that claim "any file" (`public.data`) are filtered out unless you press **⌘G**.
 - **Copy to clipboard.** Use **⌘C** on any selection.
 
-![Open With file chooser: pick an app to open README.md](docs/open-with.png)
+<p align="center"><img src="docs/open-with.png" width="400" alt="Open With file chooser: pick an app to open README.md"></p>
 
 ## Install
 
