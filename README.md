@@ -10,7 +10,7 @@ Written in plain Objective-C and AppKit. No Electron, no dependencies, no backgr
 
 macOS has no built-in screen that shows all file associations. The Finder's *Get Info → Open with → Change All…* works on one extension at a time and does not cover URL schemes. Command-line tools such as `duti` need you to know bundle IDs and UTIs. Open With lists everything in one window, lets you search it, and changes defaults in bulk with a couple of clicks.
 
-The app was inspired by [`duti`](https://github.com/moretension/duti). It started from two everyday problems: moving every file type from one editor to another (Antigravity to Visual Studio Code), and making `.pdf` open in Preview after Finder's *Open With* would not keep the change.
+The app was inspired by [`duti`](https://github.com/moretension/duti). It started from two everyday problems: switching every file type from one code editor to another (for example, between Antigravity and Visual Studio Code), and making `.pdf` open in Preview after Finder's *Open With* would not keep the change.
 
 ## Features
 
