@@ -1,0 +1,28 @@
+# Open With
+
+> Open With is a free, open-source (MIT), native macOS app (macOS 12+, Apple Silicon and Intel) for viewing and changing default application associations: which app opens each file extension, UTI (Uniform Type Identifier) and URL scheme (http, https, mailto, custom schemes). It is a graphical alternative to the `duti` command-line tool. It can also act as an "Open With" chooser that asks which app to use each time a file is opened.
+
+Key facts:
+
+- Written in plain Objective-C with AppKit. No dependencies, no background processes, no private APIs.
+- Reads app Info.plist declarations (`CFBundleDocumentTypes`, `LSItemContentTypes`, `CFBundleTypeExtensions`, `CFBundleURLTypes`). Changes defaults with `NSWorkspace setDefaultApplicationAtURL:toOpenContentType:` and `toOpenURLsWithScheme:`.
+- Common tasks: change the default app for a file type (for example `.pdf`), move all file associations from one app to another, change the default browser or mail app, and fix PDFs that keep opening in the wrong app after Finder's "Change All…".
+- Safety: system-critical types (applications, Unix executables, folders, volumes, `public.data`, the `file` scheme) are never reassigned. In the All Extensions list, rows can be reassigned together only when they share the same current default app.
+- Build from source with `make install` (needs the Xcode Command Line Tools).
+
+## Docs
+
+- [README](https://github.com/hza/openwith/blob/main/README.md): features, install, usage, keyboard shortcuts, FAQ
+- [Full documentation for LLMs](https://github.com/hza/openwith/blob/main/llms-full.txt): everything in one file
+
+## Source
+
+- [Model.m](https://github.com/hza/openwith/blob/main/src/Model.m): app scanning, association loading, search, protected types
+- [Controller+Assign.m](https://github.com/hza/openwith/blob/main/src/Controller+Assign.m): the Assign sheet and writing defaults
+- [Controller+OpenWith.m](https://github.com/hza/openwith/blob/main/src/Controller+OpenWith.m): the "Open With" file chooser
+
+## Optional
+
+- [Screenshot: main window](https://github.com/hza/openwith/blob/main/docs/main-window.png)
+- [Screenshot: file chooser](https://github.com/hza/openwith/blob/main/docs/open-with.png)
+- [License (MIT)](https://github.com/hza/openwith/blob/main/LICENSE)
