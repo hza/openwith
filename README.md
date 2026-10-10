@@ -12,11 +12,11 @@ macOS has no built-in screen that shows all file associations. The Finder's *Get
 
 ## Features
 
-- **Every association in one table.** Each extension claimed by any installed app, with its UTI, the number of apps that claim it, and the current default app.
+- **Every association in one table.** Each extension and URL scheme claimed by any installed app, with its UTI, the number of apps that claim it, and the current default app.
 - **Per-app view.** Select an app in the sidebar to see every document type, extension, UTI, and URL scheme it declares, its role (Editor/Viewer) and handler rank (Owner/Default/Alternate), and whether it is currently the default.
 - **Search by app name or extension.** Type `.pdf` to find every app that can open PDFs, including apps that claim a parent UTI such as `public.image`.
 - **Bulk reassignment.** Select many rows and press **Return** to assign them all to one app, or **⌘D** to make the selected app the default for its own types.
-- **Change URL scheme handlers.** Set the default browser, mail client, or any custom `scheme://` handler.
+- **Change URL scheme handlers.** Search `http`, `mailto:` or any custom `scheme://` to set the default browser, mail client, or other URL handler.
 - **"Open With" picker for files.** Make Open With the default for a file type and you get a quick, filterable chooser every time you open such a file. It remembers your last choice per extension and includes an *Always open with this app* checkbox.
 - **Generic handlers hidden by default.** Apps that claim "any file" (`public.data`) are filtered out unless you press **⌘G**.
 - **Copy to clipboard.** Use **⌘C** on any selection.
@@ -40,7 +40,7 @@ The app is ad-hoc signed. If Gatekeeper complains on first launch, right-click t
 ## Usage
 
 1. Launch **Open With**. With **All Apps** selected, the table shows every known extension and its current default app.
-2. Search with **⌘F**, by app name (`Preview`) or by extension (`.md`).
+2. Search with **⌘F**, by app name (`Preview`), extension (`.md`), or URL scheme (`mailto`, `https://`).
 3. Select one or more rows and press **Return** (*Assign to…*), choose an app, and click **Assign**.
 4. Or pick an app in the sidebar, select its rows, and press **⌘D** to make it the default for them.
 
@@ -52,7 +52,7 @@ Assign a file type (for example `.md`) to **Open With** itself. Opening a Markdo
 
 | Shortcut | Action |
 |---|---|
-| ⌘F | Search apps or extensions |
+| ⌘F | Search apps, extensions, or URL schemes |
 | Return | Assign selected rows to another app |
 | ⌘D | Make the selected app the default for the selected rows |
 | ⌘G | Show or hide generic handlers in the app picker |
@@ -84,7 +84,7 @@ Open Open With, search for the extension (for example `.pdf`), select the row, p
 Select the app in the sidebar, select all its rows (⌘A), and press ⌘D.
 
 **How do I change the default browser or mail app?**
-Select the browser or mail app in the sidebar, select its `http`/`https` or `mailto` URL scheme rows, and press ⌘D. macOS may ask you to confirm the change.
+Search for `http` (or `mailto`), select the URL scheme rows (`http://` and `https://` for a browser), press Return, choose the app, and click Assign. macOS may ask you to confirm the change.
 
 **Is it a replacement for `duti` or RCDefaultApp?**
 Yes, it does the same job with a graphical interface: listing and changing file-extension, UTI, and URL-scheme handlers.
