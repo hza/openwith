@@ -22,6 +22,7 @@
 @property NSArray<Assoc *> *assocs; // loaded lazily
 @property NSSet<NSString *> *exts;   // lowercase extensions claimed, for ".ext" filtering
 @property NSSet<NSString *> *utis;   // UTIs claimed; an extension whose type conforms to one also matches
+@property NSSet<NSString *> *schemes; // lowercase URL schemes claimed, for "mailto" / "http://" filtering
 @end
 
 // Collect every filename extension an app claims, directly or via its declared UTIs.
@@ -29,11 +30,16 @@ NSSet<NSString *> *ClaimedExtensions(NSDictionary *info);
 
 NSSet<NSString *> *ClaimedUTIs(NSDictionary *info);
 
+NSSet<NSString *> *ClaimedSchemes(NSDictionary *info);
+
 // The claimed UTI that `t` conforms to (e.g. public.text for .md), or nil.
 NSString *ConformingUTI(NSSet<NSString *> *utis, UTType *t);
 
 // ".c .cpp" / ".c, .cpp": the lowercased extensions (no dots) when every term is a ".ext", else nil.
 NSArray<NSString *> *ExtTerms(NSString *q);
+
+// "mailto:" / "http://": the lowercased scheme, else nil.
+NSString *SchemeTerm(NSString *q);
 
 NSArray<AppEntry *> *FilterApps(NSArray<AppEntry *> *apps, NSString *q);
 
@@ -45,7 +51,7 @@ NSArray<Assoc *> *LoadAssocs(AppEntry *app);
 
 NSArray<AppEntry *> *ScanApps(void);
 
-// One row per extension claimed by any app (shown when no app is selected).
+// One row per extension and URL scheme claimed by any app (shown when no app is selected).
 NSArray<Assoc *> *BuildOverview(NSArray<AppEntry *> *apps);
 
 // Bundle ID of the app currently handling every one of the given associations, or nil if they differ.

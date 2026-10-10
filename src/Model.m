@@ -36,6 +36,17 @@ NSSet<NSString *> *ClaimedUTIs(NSDictionary *info) {
     return s;
 }
 
+NSSet<NSString *> *ClaimedSchemes(NSDictionary *info) {
+    NSMutableSet *s = [NSMutableSet set];
+    for (NSDictionary *ut in info[@"CFBundleURLTypes"]) {
+        if (![ut isKindOfClass:[NSDictionary class]]) continue;
+        NSArray *schemes = ut[@"CFBundleURLSchemes"];
+        if ([schemes isKindOfClass:[NSArray class]])
+            for (NSString *x in schemes) if ([x isKindOfClass:[NSString class]]) [s addObject:x.lowercaseString];
+    }
+    return s;
+}
+
 // The claimed UTI that `t` conforms to (e.g. public.text for .md), or nil.
 NSString *ConformingUTI(NSSet<NSString *> *utis, UTType *t) {
     if (!t) return nil;
@@ -46,14 +57,27 @@ NSString *ConformingUTI(NSSet<NSString *> *utis, UTType *t) {
     return nil;
 }
 
+// "mailto:" / "http://": the lowercased scheme, else nil.
+NSString *SchemeTerm(NSString *q) {
+    NSRange r = [q rangeOfString:@":"];
+    if (r.location == NSNotFound || r.location == 0) return nil;
+    NSString *rest = [q substringFromIndex:r.location];
+    if (!([rest isEqual:@":"] || [rest isEqual:@":/"] || [rest isEqual:@"://"])) return nil;
+    return [q substringToIndex:r.location].lowercaseString;
+}
+
 // Filter: ".md" matches apps claiming that extension, directly or via a parent UTI (Notes claims
-// public.text, which .md conforms to); anything else matches name / bundle ID.
+// public.text, which .md conforms to); "mailto:" / "http://" matches apps claiming that URL scheme;
+// anything else matches name / bundle ID, or a claimed URL scheme spelled out exactly ("https").
 static BOOL AppMatches(AppEntry *e, NSString *q, UTType *extType) {
     if (!q.length) return YES;
     if ([q hasPrefix:@"."] && q.length > 1)
         return [e.exts containsObject:[q substringFromIndex:1].lowercaseString] || ConformingUTI(e.utis, extType);
+    NSString *scheme = SchemeTerm(q);
+    if (scheme) return [e.schemes containsObject:scheme];
     return [e.name localizedCaseInsensitiveContainsString:q] ||
-           [e.bundleID localizedCaseInsensitiveContainsString:q];
+           [e.bundleID localizedCaseInsensitiveContainsString:q] ||
+           [e.schemes containsObject:q.lowercaseString];
 }
 
 // ".c .cpp" / ".c, .cpp": the lowercased extensions (no dots) when every term is a ".ext", else nil.
@@ -190,6 +214,7 @@ NSArray<AppEntry *> *ScanApps(void) {
             e.name = [fm displayNameAtPath:u.path];
             e.exts = ClaimedExtensions(info);
             e.utis = ClaimedUTIs(info);
+            e.schemes = ClaimedSchemes(info);
             byID[bid] = e;
         }
     }
@@ -221,7 +246,26 @@ NSArray<Assoc *> *BuildOverview(NSArray<AppEntry *> *apps) {
         a.defaultApp = name ?: @"—";
         [out addObject:a];
     }
-    return [out sortedArrayUsingComparator:^(Assoc *a, Assoc *b) {
+    NSCountedSet *schemes = [NSCountedSet set];
+    for (AppEntry *e in apps) for (NSString *x in e.schemes) [schemes addObject:x];
+    for (NSString *x in schemes) {
+        Assoc *a = [Assoc new];
+        a.kind = @"URL scheme";
+        a.scheme = x;
+        a.identifier = [x stringByAppendingString:@"://"];
+        a.extensions = @"";
+        NSUInteger n = [schemes countForObject:x];
+        a.role = [NSString stringWithFormat:@"%lu app%@", (unsigned long)n, n == 1 ? @"" : @"s"];
+        a.rank = @"";
+        NSURL *probe = [NSURL URLWithString:a.identifier];
+        NSURL *u = probe ? [ws URLForApplicationToOpenURL:probe] : nil;
+        NSString *name = u ? names[u.path] : nil;
+        if (u && !name) names[u.path] = name = DefaultAppNameForURL(u, NULL);
+        a.defaultApp = name ?: @"—";
+        [out addObject:a];
+    }
+    return [out sortedArrayUsingComparator:^NSComparisonResult(Assoc *a, Assoc *b) {
+        if (!a.scheme != !b.scheme) return a.scheme ? NSOrderedDescending : NSOrderedAscending;
         return [a.identifier localizedCaseInsensitiveCompare:b.identifier];
     }];
 }

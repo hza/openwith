@@ -92,6 +92,8 @@
                     }
                     return NO;
                 }
+                NSString *scheme = SchemeTerm(q);
+                if (scheme) return [a.scheme isEqualToString:scheme];
                 return [a.identifier localizedCaseInsensitiveContainsString:q] ||
                        [a.extensions localizedCaseInsensitiveContainsString:q] ||
                        [a.defaultApp localizedCaseInsensitiveContainsString:q];
@@ -101,9 +103,10 @@
         self.assocs = rows;
         [self.assocTable reloadData];
         [self updateTransferButton];
+        NSUInteger schemes = [[rows filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"scheme != nil"]] count];
         self.window.title = @"All Extensions";
-        self.window.subtitle = [NSString stringWithFormat:@"%lu extensions claimed by %lu applications",
-                                (unsigned long)rows.count, (unsigned long)self.apps.count];
+        self.window.subtitle = [NSString stringWithFormat:@"%lu extensions and %lu URL schemes claimed by %lu applications",
+                                (unsigned long)(rows.count - schemes), (unsigned long)schemes, (unsigned long)self.apps.count];
         [self syncTitle:nil];
         return;
     }

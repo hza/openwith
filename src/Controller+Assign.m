@@ -49,15 +49,17 @@ static NSString *const kShowGenericKey = @"ShowGenericHandlers";
     if (!targets.count) return;
 
     AppPicker *picker = [[AppPicker alloc] initWithApps:targets selectBundleID:nil];
-    // Single association: pre-filter to apps claiming its extension
+    // Single association: pre-filter to apps claiming its extension or URL scheme
     if (items.count == 1) {
         Assoc *it = items[0];
         NSString *ext = [it.kind isEqual:@"Extension"] && [it.identifier hasPrefix:@"."]
             ? [[it.identifier substringFromIndex:1] componentsSeparatedByString:@" "].firstObject
             : [it.extensions componentsSeparatedByString:@", "].firstObject;
         if (!ext.length) ext = it.type.preferredFilenameExtension;
-        if (ext.length) {
-            picker.search.stringValue = [@"." stringByAppendingString:ext];
+        NSString *q = it.scheme ? [it.scheme stringByAppendingString:@":"]
+                    : ext.length ? [@"." stringByAppendingString:ext] : nil;
+        if (q) {
+            picker.search.stringValue = q;
             [picker controlTextDidChange:[NSNotification notificationWithName:NSControlTextDidChangeNotification object:picker.search]];
         }
     }
@@ -169,16 +171,23 @@ static NSString *const kShowGenericKey = @"ShowGenericHandlers";
     NSWorkspace *ws = [NSWorkspace sharedWorkspace];
     dispatch_group_t group = dispatch_group_create();
     NSMutableArray<NSString *> *errors = [NSMutableArray array];
+    BOOL browserDone = NO;
     for (Assoc *a in items) {
+        // http/https are the default-browser setting: macOS only accepts it via "http" (which sets both),
+        // asks the user to confirm, and may report an error meanwhile — so don't treat that as a failure.
+        BOOL browser = [a.scheme isEqual:@"http"] || [a.scheme isEqual:@"https"];
+        if (browser && browserDone) continue;
+        browserDone |= browser;
         dispatch_group_enter(group);
         void (^done)(NSError *) = ^(NSError *err) {
-            if (err) @synchronized (errors) {
+            if (err && !browser) @synchronized (errors) {
                 [errors addObject:[NSString stringWithFormat:@"%@: %@", a.identifier, err.localizedDescription]];
             }
             dispatch_group_leave(group);
         };
         if (a.scheme)
-            [ws setDefaultApplicationAtURL:target.url toOpenURLsWithScheme:a.scheme completionHandler:done];
+            [ws setDefaultApplicationAtURL:target.url toOpenURLsWithScheme:browser ? @"http" : a.scheme
+                         completionHandler:done];
         else
             [ws setDefaultApplicationAtURL:target.url toOpenContentType:a.type completionHandler:done];
     }
