@@ -27,7 +27,15 @@ The app was inspired by [`duti`](https://github.com/moretension/duti). It starte
 
 ## Install
 
-Build from source (needs the Xcode Command Line Tools: `xcode-select --install`):
+Download the latest `OpenWith-x.y.zip` from [Releases](https://github.com/hza/openwith/releases), unzip it, and move **Open With.app** to `/Applications` or `~/Applications`. It is a universal build that runs on both Apple Silicon and Intel Macs.
+
+The app is ad-hoc signed and not notarized, so macOS blocks the first launch. Allow it in **System Settings → Privacy & Security → Open Anyway**, or run:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/Open With.app"
+```
+
+Or build from source (needs the Xcode Command Line Tools: `xcode-select --install`):
 
 ```sh
 git clone https://github.com/hza/openwith.git
@@ -36,8 +44,6 @@ make install     # builds and copies "Open With.app" to ~/Applications
 ```
 
 `make install` also registers the app with LaunchServices, so it appears straight away in Finder's *Open With* menu.
-
-The app is ad-hoc signed. If Gatekeeper complains on first launch, right-click the app and choose **Open**.
 
 ## Usage
 

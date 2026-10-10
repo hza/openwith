@@ -1,0 +1,36 @@
+# Push a tag like v0.2 → build a universal "Open With.app" with make and attach it to a GitHub release.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" Info.plist
+
+      - name: Build
+        run: make ARCH="arm64 x86_64"
+
+      - name: Package
+        run: ditto -c -k --keepParent "build/Open With.app" "build/OpenWith-$VERSION.zip"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "build/OpenWith-$VERSION.zip" \
+            --title "Open With $VERSION" --generate-notes \
+            --notes "Universal build (Apple Silicon + Intel), macOS 12+. The app is ad-hoc signed: after unzipping, run \`xattr -dr com.apple.quarantine \"Open With.app\"\` or use System Settings → Privacy & Security → Open Anyway."
