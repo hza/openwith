@@ -10,12 +10,14 @@ Written in plain Objective-C and AppKit. No Electron, no dependencies, no backgr
 
 macOS has no built-in screen that shows all file associations. The Finder's *Get Info → Open with → Change All…* works on one extension at a time and does not cover URL schemes. Command-line tools such as `duti` need you to know bundle IDs and UTIs. Open With lists everything in one window, lets you search it, and changes defaults in bulk with a couple of clicks.
 
+The app was inspired by [`duti`](https://github.com/moretension/duti). It started from two everyday problems: moving every file type from one editor to another (Antigravity to Visual Studio Code), and making `.pdf` open in Preview after Finder's *Open With* would not keep the change.
+
 ## Features
 
 - **Every association in one table.** Each extension and URL scheme claimed by any installed app, with its UTI, the number of apps that claim it, and the current default app.
 - **Per-app view.** Select an app in the sidebar to see every document type, extension, UTI, and URL scheme it declares, its role (Editor/Viewer) and handler rank (Owner/Default/Alternate), and whether it is currently the default.
 - **Search by app name or extension.** Type `.pdf` to find every app that can open PDFs, including apps that claim a parent UTI such as `public.image`.
-- **Bulk reassignment.** Select many rows and press **Return** to assign them all to one app, or **⌘D** to make the selected app the default for its own types.
+- **Bulk reassignment.** Select many rows and press **Return** to assign them all to one app, or **⌘D** to make the selected app the default for its own types. In All Extensions, rows can be reassigned together only when they share the same current default, so a stray ⌘A can't hand every type to one app. System-critical types (applications, Unix executables, folders, volumes, `public.data`, the `file` scheme) are shown greyed out and are never reassigned.
 - **Change URL scheme handlers.** Search `http`, `mailto:` or any custom `scheme://` to set the default browser, mail client, or other URL handler.
 - **"Open With" picker for files.** Make Open With the default for a file type and you get a quick, filterable chooser every time you open such a file. It remembers your last choice per extension and includes an *Always open with this app* checkbox.
 - **Generic handlers hidden by default.** Apps that claim "any file" (`public.data`) are filtered out unless you press **⌘G**.
@@ -56,6 +58,7 @@ Assign a file type (for example `.md`) to **Open With** itself. Opening a Markdo
 | Return | Assign selected rows to another app |
 | ⌘D | Make the selected app the default for the selected rows |
 | ⌘G | Show or hide generic handlers in the app picker |
+| ⌘A | Select all rows |
 | ⌘C | Copy the selected rows |
 | ⌘R | Rescan installed applications |
 
@@ -81,7 +84,15 @@ Open With scans `/Applications`, `/System/Applications`, `/System/Library/CoreSe
 Open Open With, search for the extension (for example `.pdf`), select the row, press Return, choose the app, and click Assign.
 
 **How do I change the default app for every extension an app supports?**
-Select the app in the sidebar, select all its rows (⌘A), and press ⌘D.
+Select the app in the sidebar, click any of its rows and press ⌘A to select them all, and press ⌘D.
+
+**How do I move all file associations from one app to another, for example from Antigravity to VS Code?**
+Select the old app (Antigravity) in the sidebar, click any of its rows and press ⌘A to select them all, press Return, choose the new app (Visual Studio Code), and click Assign. Every extension and UTI the old app claimed now opens in the new one.
+
+Or go the other way: select the new app (Visual Studio Code) in the sidebar, click any of its rows, press ⌘A, then ⌘D. That makes it the default for every type it declares, including types the old app never claimed.
+
+**Why do PDFs keep opening in Preview (or Acrobat) after "Get Info → Open with → Change All…"? How do I change the default PDF viewer on a Mac?**
+It's a long-standing macOS problem. Finder's *Change All…* sometimes doesn't take effect, or the default app for PDFs reverts later. People report it with Preview, Adobe Acrobat, Acrobat Reader and other PDF apps. To fix it, search for `.pdf` in Open With, select the row, press Return, choose your PDF app (Preview, Acrobat, PDF Expert, …), and click Assign. Open With sets the default handler for the PDF content type (`com.adobe.pdf`) directly through LaunchServices. That is the same change as `duti -s <bundle-id> com.adobe.pdf all`, and it often works when the Finder setting won't stick. The same steps work for any other file type whose default app keeps resetting.
 
 **How do I change the default browser or mail app?**
 Search for `http` (or `mailto`), select the URL scheme rows (`http://` and `https://` for a browser), press Return, choose the app, and click Assign. macOS may ask you to confirm the change.
