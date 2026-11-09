@@ -1,6 +1,7 @@
 // usage: swift mask.swift <source.png> <out.png>
-// Finds the icon tile in source (anything differing from the corner/background colour),
-// clips it to a rounded rect and centres it on a transparent 1024x1024 canvas.
+// Finds the artwork in source (anything differing from the corner/background colour) and
+// centres it on a rounded-square plate (filled with that background colour, with a soft
+// drop shadow) on a transparent 1024x1024 canvas, macOS Big Sur-style like VS Code's icon.
 import AppKit
 
 let args = CommandLine.arguments
@@ -23,40 +24,39 @@ func diff(_ x: Int, _ y: Int) -> Int {
     let i = (y * w + x) * 4
     return (0..<4).map { abs(Int(px[i + $0]) - Int(bg[$0])) }.max()!
 }
-// threshold halfway between background and the tile fill sampled 1/8 inward, so a soft
-// shadow/halo around the tile isn't mistaken for the tile itself
-func edge(_ pts: [(Int, Int)]) -> Int? {
-    let fill = diff(pts[pts.count / 8].0, pts[pts.count / 8].1)
-    let thr = max(4, fill / 2)
-    // require a short run so single noisy pixels don't count as an edge
-    return pts.indices.first { i in pts[i..<min(i + 3, pts.count)].allSatisfy { diff($0.0, $0.1) > thr } }
-}
-// tile edges: first differing pixel scanning inward along the middle row/column
-let mx = w / 2, my = h / 2
-let l = edge((0..<w).map { ($0, my) }) ?? 0
-let r = w - 1 - (edge((0..<w).reversed().map { ($0, my) }) ?? 0)
-let t = edge((0..<h).map { (mx, $0) }) ?? 0
-let b = h - 1 - (edge((0..<h).reversed().map { (mx, $0) }) ?? 0)
 
-// small inset drops the anti-aliased fringe / shadow
-let inset = Double(r - l) * 0.004
-let tile = CGRect(x: Double(l) + inset, y: Double(h - 1 - b) + inset,
-                  width: Double(r - l + 1) - 2 * inset, height: Double(b - t + 1) - 2 * inset)
-FileHandle.standardError.write("tile: x \(l)...\(r), y \(t)...\(b) of \(w)x\(h)\n".data(using: .utf8)!)
+// bounding box of everything noticeably different from the background
+var l = w, r = -1, t = h, b = -1
+for y in 0..<h { for x in 0..<w where diff(x, y) > 12 {
+    l = min(l, x); r = max(r, x); t = min(t, y); b = max(b, y)
+} }
+FileHandle.standardError.write("art: x \(l)...\(r), y \(t)...\(b) of \(w)x\(h)\n".data(using: .utf8)!)
+let art = CGRect(x: l, y: h - 1 - b, width: r - l + 1, height: b - t + 1)  // CG coords (origin bottom-left)
 
 let size = 1024, tileSize = 824.0, margin = (1024.0 - tileSize) / 2
 let ctx = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8, bytesPerRow: 0,
                     space: rgb, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
 ctx.interpolationQuality = .high
 
-let dst = CGRect(x: margin, y: margin, width: tileSize, height: tileSize)
-ctx.addPath(CGPath(roundedRect: dst, cornerWidth: tileSize * 0.225, cornerHeight: tileSize * 0.225, transform: nil))
-ctx.clip()
+// plate: rounded square in the source's background colour, with a soft shadow
+let plate = CGRect(x: margin, y: margin + 10, width: tileSize, height: tileSize)
+let path = CGPath(roundedRect: plate, cornerWidth: tileSize * 0.225, cornerHeight: tileSize * 0.225, transform: nil)
+let a = CGFloat(bg[3]) / 255
+let fill = CGColor(srgbRed: CGFloat(bg[0]) / 255 / max(a, 0.001), green: CGFloat(bg[1]) / 255 / max(a, 0.001),
+                   blue: CGFloat(bg[2]) / 255 / max(a, 0.001), alpha: 1)
+ctx.saveGState()
+ctx.setShadow(offset: CGSize(width: 0, height: -10), blur: 24, color: CGColor(gray: 0, alpha: 0.3))
+ctx.setFillColor(fill)
+ctx.addPath(path)
+ctx.fillPath()
+ctx.restoreGState()
 
-// scale/translate so the source tile lands exactly on dst
-let sx = tileSize / tile.width, sy = tileSize / tile.height
-ctx.draw(cg, in: CGRect(x: margin - tile.minX * sx, y: margin - tile.minY * sy,
-                        width: Double(w) * sx, height: Double(h) * sy))
+// artwork: longest side = 70% of the plate, centred, clipped to the plate
+ctx.addPath(path)
+ctx.clip()
+let s = tileSize * 0.70 / Double(max(art.width, art.height))
+let ax = plate.midX - art.midX * s, ay = plate.midY - art.midY * s
+ctx.draw(cg, in: CGRect(x: ax, y: ay, width: Double(w) * s, height: Double(h) * s))
 
 let rep = NSBitmapImageRep(cgImage: ctx.makeImage()!)
 try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: args[2]))
