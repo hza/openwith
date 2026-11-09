@@ -1,113 +1,96 @@
-# Open With — change default apps for file types and URL schemes on macOS
+# Open With: choose which app opens your files on a Mac
 
-**Open With** is a free, lightweight, native macOS app for viewing and changing **default application associations**: which app opens `.pdf`, `.md`, `.json`, `.html` and every other file extension, UTI (Uniform Type Identifier), and URL scheme (`http`, `mailto`, …) on your Mac. It can also act as an **"Open With" chooser**: set it as the default for a file type, and it asks which app to use every time you open a file of that type.
+**Open With** is a free, small Mac app that shows which app opens each kind of file, such as PDFs, pictures, text, and web pages, and lets you change it in a couple of clicks. It also handles links: pick your default web browser, mail app, and so on.
 
-Written in plain Objective-C and AppKit. No Electron, no dependencies, no background daemons. Requires **macOS 12 Monterey or later** and runs natively on Apple Silicon and Intel.
+PDFs keep opening in the wrong app? Make Preview the default:
 
-![Open With main window: all file extensions with their current default app, and the Assign sheet for .pdf](docs/main-window.png)
+![Choosing Preview as the app for PDF files](docs/mac-default-app-pdf-preview.png)
+
+Prefer another image viewer? Send PNG pictures to qView:
+
+![Choosing qView as the app for PNG pictures](docs/mac-default-app-png-qview.png)
 
 ## Why
 
-macOS has no built-in screen that shows all file associations. The Finder's *Get Info → Open with → Change All…* works on one extension at a time and does not cover URL schemes. Command-line tools such as `duti` need you to know bundle IDs and UTIs. Open With lists everything in one window, lets you search it, and changes defaults in bulk with a couple of clicks.
+The Mac has no single place that shows which app opens what. In Finder you can use *Get Info → Open with → Change All…*, but only for one file type at a time, it doesn't cover links, and sometimes the change doesn't stick. Open With puts everything in one window, lets you search it, and changes many file types at once.
 
-The app was inspired by [`duti`](https://github.com/moretension/duti). It started from two everyday problems: switching every file type from one code editor to another (for example, between Antigravity and Visual Studio Code), and making `.pdf` open in Preview after Finder's *Open With* would not keep the change.
+## What it does
 
-## Features
+- **See everything in one list.** Every file type on your Mac and the app that currently opens it.
+- **See what an app can open.** Click an app in the sidebar to see all the file types it supports and which ones it already opens by default.
+- **Search.** Type an app name (`Preview`) or a file type (`.pdf`) to find it fast.
+- **Change many at once.** Select several file types and send them all to one app. Handy when you switch from one text editor to another.
+- **Pick your browser and mail app.** Search `http` or `mailto` and choose the app.
+- **Ask every time.** Make Open With the default for a file type, and you get a quick app chooser each time you open such a file. It remembers your last pick, and you can tick *Always open with this app* to stop being asked.
+- **Safe by design.** File types your Mac needs to work properly, such as apps and folders, are greyed out and can't be changed by accident.
 
-- **Every association in one table.** Each extension and URL scheme claimed by any installed app, with its UTI, the number of apps that claim it, and the current default app.
-- **Per-app view.** Select an app in the sidebar to see every document type, extension, UTI, and URL scheme it declares, its role (Editor/Viewer) and handler rank (Owner/Default/Alternate), and whether it is currently the default.
-- **Search by app name or extension.** Type `.pdf` to find every app that can open PDFs, including apps that claim a parent UTI such as `public.image`.
-- **Bulk reassignment.** Select many rows and press **Return** to assign them all to one app, or **⌘D** to make the selected app the default for its own types. In All Extensions, rows can be reassigned together only when they share the same current default, so a stray ⌘A can't hand every type to one app. System-critical types (applications, Unix executables, folders, volumes, `public.data`, the `file` scheme) are shown greyed out and are never reassigned.
-- **Change URL scheme handlers.** Search `http`, `mailto:` or any custom `scheme://` to set the default browser, mail client, or other URL handler.
-- **"Open With" picker for files.** Make Open With the default for a file type and you get a quick, filterable chooser every time you open such a file. It remembers your last choice per extension and includes an *Always open with this app* checkbox.
-- **Generic handlers hidden by default.** Apps that claim "any file" (`public.data`) are filtered out unless you press **⌘G**.
-- **Copy to clipboard.** Use **⌘C** on any selection.
+It can also ask you every time. Make Open With the default for a file type, and whenever you open such a file it shows a short list of apps to choose from.
 
-<p align="center"><img src="docs/open-with.png" width="400" alt="Open With file chooser: pick an app to open README.md"></p>
+<p align="center"><img src="docs/mac-open-with-app-chooser.png" width="400" alt="The Open With chooser asking which app should open a file"></p>
 
 ## Install
 
-Download the latest `OpenWith-x.y.zip` from [Releases](https://github.com/hza/openwith/releases), unzip it, and move **Open With.app** to `/Applications` or `~/Applications`. It is a universal build that runs on both Apple Silicon and Intel Macs.
+Works on **macOS 12 Monterey or later**, on both Apple Silicon and Intel Macs.
 
-The app is ad-hoc signed and not notarized, so macOS blocks the first launch. Allow it in **System Settings → Privacy & Security → Open Anyway**, or run:
+1. Download the latest `OpenWith.dmg` from [Releases](https://github.com/hza/openwith/releases).
+2. Open it and drag **Open With.app** into your **Applications** folder.
+3. The first time you open it, macOS will say it can't check the app for malicious software, because the app isn't registered with Apple. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway**.
 
-```sh
-xattr -dr com.apple.quarantine "/Applications/Open With.app"
-```
+   If you'd rather use Terminal, paste this command and press Return:
 
-Or build from source (needs the Xcode Command Line Tools: `xcode-select --install`):
-
-```sh
-git clone https://github.com/hza/openwith.git
-cd openwith
-make install     # builds and copies "Open With.app" to ~/Applications
-```
-
-`make install` also registers the app with LaunchServices, so it appears straight away in Finder's *Open With* menu.
-
-## Usage
-
-1. Launch **Open With**. With **All Apps** selected, the table shows every known extension and its current default app.
-2. Search with **⌘F**, by app name (`Preview`), extension (`.md`), or URL scheme (`mailto`, `https://`).
-3. Select one or more rows and press **Return** (*Assign to…*), choose an app, and click **Assign**.
-4. Or pick an app in the sidebar, select its rows, and press **⌘D** to make it the default for them.
-
-### Use it as an "Open With" chooser
-
-Assign a file type (for example `.md`) to **Open With** itself. Opening a Markdown file then shows the chooser, so you can pick the editor or viewer you want each time. Tick *Always open .md files with this app* to make that choice permanent. **Manage Associations…** opens the main window.
-
-### Keyboard shortcuts
-
-| Shortcut | Action |
-|---|---|
-| ⌘F | Search apps, extensions, or URL schemes |
-| Return | Assign selected rows to another app |
-| ⌘D | Make the selected app the default for the selected rows |
-| ⌘G | Show or hide generic handlers in the app picker |
-| ⌘A | Select all rows |
-| ⌘C | Copy the selected rows |
-| ⌘R | Rescan installed applications |
-
-## How it works
-
-Open With scans `/Applications`, `/System/Applications`, `/System/Library/CoreServices` and `~/Applications`, and reads each app's `Info.plist` (`CFBundleDocumentTypes`, `LSItemContentTypes`, `CFBundleTypeExtensions`, `CFBundleURLTypes`). It resolves types with `UniformTypeIdentifiers` and reads and writes defaults through the public `NSWorkspace` APIs (`URLForApplicationToOpenContentType:`, `setDefaultApplicationAtURL:toOpenContentType:` and related calls). It uses no private APIs and does not edit the LaunchServices database by hand.
-
-## Building
-
-| Command | Description |
-|---|---|
-| `make` | Build and ad-hoc sign `build/Open With.app` |
-| `make run` | Build and launch from `build/` |
-| `make install` | Install to `~/Applications` and register with LaunchServices |
-| `make open` | Quit, reinstall, and relaunch |
-| `make uninstall` | Remove the app and its preferences |
-| `make clean` | Remove `build/` |
-| `make help` | List all targets |
+   ```sh
+   xattr -dr com.apple.quarantine "/Applications/Open With.app"
+   ```
 
 ## FAQ
 
-**How do I change the default app for a file type on a Mac?**
-Open Open With, search for the extension (for example `.pdf`), select the row, press Return, choose the app, and click Assign.
+### How do I change the default app for a file type on a Mac?
 
-**How do I change the default app for every extension an app supports?**
-Select the app in the sidebar, click any of its rows and press ⌘A to select them all, and press ⌘D.
+1. Open **Open With**.
+2. Press **⌘F** and type the file type, for example `.pdf`.
+3. Select the row and press **Return**.
+4. Choose the app and click **Assign**.
 
-**How do I move all file associations from one app to another, for example from Antigravity to VS Code?**
-Select the old app (Antigravity) in the sidebar, click any of its rows and press ⌘A to select them all, press Return, choose the new app (Visual Studio Code), and click Assign. Every extension and UTI the old app claimed now opens in the new one.
+### How do I move all file types from one app to another on a Mac?
 
-Or go the other way: select the new app (Visual Studio Code) in the sidebar, click any of its rows, press ⌘A, then ⌘D. That makes it the default for every type it declares, including types the old app never claimed.
+For example, when you switch from one code editor to another:
 
-**Why do PDFs keep opening in Preview (or Acrobat) after "Get Info → Open with → Change All…"? How do I change the default PDF viewer on a Mac?**
-It's a long-standing macOS problem. Finder's *Change All…* sometimes doesn't take effect, or the default app for PDFs reverts later. People report it with Preview, Adobe Acrobat, Acrobat Reader and other PDF apps. To fix it, search for `.pdf` in Open With, select the row, press Return, choose your PDF app (Preview, Acrobat, PDF Expert, …), and click Assign. Open With sets the default handler for the PDF content type (`com.adobe.pdf`) directly through LaunchServices. That is the same change as `duti -s <bundle-id> com.adobe.pdf all`, and it often works when the Finder setting won't stick. The same steps work for any other file type whose default app keeps resetting.
+1. Click the old app in the sidebar.
+2. Click any row, then press **⌘A** to select all of them.
+3. Press **Return**, choose the new app, and click **Assign**.
 
-**How do I change the default browser or mail app?**
-Search for `http` (or `mailto`), select the URL scheme rows (`http://` and `https://` for a browser), press Return, choose the app, and click Assign. macOS may ask you to confirm the change.
+Or click the new app in the sidebar, press **⌘A**, then **⌘D** to make it the default for everything it can open.
 
-**Is it a replacement for `duti` or RCDefaultApp?**
-Yes, it does the same job with a graphical interface: listing and changing file-extension, UTI, and URL-scheme handlers.
+### How do I change the default web browser or mail app on a Mac?
 
-**Does it need special permissions or run in the background?**
-No. It only uses public `NSWorkspace` APIs and runs only while it is open.
+Search for `http` (or `mailto` for mail), select the rows, press **Return**, choose the app, and click **Assign**. macOS may ask you to confirm.
+
+### How do I choose which app opens a file each time I open it?
+
+Assign a file type, for example `.md`, to **Open With** itself. From then on, opening such a file shows a list of apps to choose from. Tick *Always open .md files with this app* if you want to stop being asked.
+
+### Why do PDFs keep opening in the wrong app even after "Change All…" in Finder?
+
+This is a common Mac problem. Search for `.pdf` in Open With, select the row, press Return, choose your PDF app (Preview, Acrobat, PDF Expert, …), and click Assign. It usually works when Finder's setting won't stick, and the same steps fix any other file type that keeps switching back.
+
+### Does Open With run in the background or need special permissions?
+
+No. It only runs while it's open and doesn't need any special access.
+
+### Is Open With free?
+
+Yes, free and open source.
+
+## Keyboard shortcuts
+
+| Shortcut | What it does |
+|---|---|
+| ⌘F | Search |
+| Return | Send the selected file types to another app |
+| ⌘D | Make the selected app the default for the selected file types |
+| ⌘A | Select all |
+| ⌘G | Show or hide apps that claim to open any file |
+| ⌘R | Look for newly installed apps |
 
 ## License
 

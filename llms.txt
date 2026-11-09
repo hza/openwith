@@ -23,6 +23,7 @@ Key facts:
 
 ## Optional
 
-- [Screenshot: main window](https://github.com/hza/openwith/blob/main/docs/main-window.png)
-- [Screenshot: file chooser](https://github.com/hza/openwith/blob/main/docs/open-with.png)
+- [Screenshot: assigning .pdf to Preview](https://github.com/hza/openwith/blob/main/docs/mac-default-app-pdf-preview.png)
+- [Screenshot: assigning .png to qView](https://github.com/hza/openwith/blob/main/docs/mac-default-app-png-qview.png)
+- [Screenshot: file chooser](https://github.com/hza/openwith/blob/main/docs/mac-open-with-app-chooser.png)
 - [License (MIT)](https://github.com/hza/openwith/blob/main/LICENSE)

@@ -4,7 +4,9 @@
 
 Written in plain Objective-C and AppKit. No Electron, no dependencies, no background daemons. Requires **macOS 12 Monterey or later** and runs natively on Apple Silicon and Intel.
 
-[Screenshot: Open With main window: all file extensions with their current default app, and the Assign sheet for .pdf](https://github.com/hza/openwith/blob/main/docs/main-window.png)
+[Screenshot: assigning the .pdf extension to Preview](https://github.com/hza/openwith/blob/main/docs/mac-default-app-pdf-preview.png)
+
+[Screenshot: assigning the .png extension to qView](https://github.com/hza/openwith/blob/main/docs/mac-default-app-png-qview.png)
 
 ## Why
 
@@ -23,7 +25,7 @@ The app was inspired by [`duti`](https://github.com/moretension/duti). It starte
 - **Generic handlers hidden by default.** Apps that claim "any file" (`public.data`) are filtered out unless you press **⌘G**.
 - **Copy to clipboard.** Use **⌘C** on any selection.
 
-[Screenshot: Open With file chooser: pick an app to open README.md](https://github.com/hza/openwith/blob/main/docs/open-with.png)
+[Screenshot: Open With file chooser: pick an app to open README.md](https://github.com/hza/openwith/blob/main/docs/mac-open-with-app-chooser.png)
 
 ## Install
 
