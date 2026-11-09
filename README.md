@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icon/icon-256.png" width="128" alt="Open With app icon">
+</p>
+
 # Open With: choose which app opens your files on a Mac
 
 **Open With** is a free, small Mac app that shows which app opens each kind of file, such as PDFs, pictures, text, and web pages, and lets you change it in a couple of clicks. It also handles links: pick your default web browser, mail app, and so on.
