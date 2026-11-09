@@ -23,7 +23,7 @@ HDRS    := $(wildcard src/*.h)
 
 $(BIN): $(SRCS) $(HDRS)
 	mkdir -p build
-	clang $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
+	xcrun clang $(CFLAGS) $(SRCS) -o $@ $(LDFLAGS)
 
 run: all ## Build and launch the app from build/
 	open "$(APP)"

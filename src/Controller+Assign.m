@@ -107,6 +107,13 @@ static NSString *const kShowGenericKey = @"ShowGenericHandlers";
     NSTextField *info = [NSTextField wrappingLabelWithString:
         @"The chosen app becomes the default handler for the selected types and URL schemes."];
     info.textColor = NSColor.secondaryLabelColor;
+    // Defaults are stored per UTI, so every extension of the type changes too (jpg → jpeg, jpe, …).
+    NSMutableOrderedSet<NSString *> *exts = [NSMutableOrderedSet orderedSet];
+    for (Assoc *a in items)
+        for (NSString *e in a.type.tags[UTTagClassFilenameExtension]) [exts addObject:[@"." stringByAppendingString:e]];
+    if (exts.count > 1)
+        info.stringValue = [info.stringValue stringByAppendingFormat:@"\nAffects all extensions of %@: %@",
+            items.count == 1 ? @"this type" : @"these types", [exts.array componentsJoinedByString:@", "]];
     NSButton *cancel = [NSButton buttonWithTitle:@"Cancel" target:NSApp action:@selector(abortModal)];
     cancel.keyEquivalent = @"\e";
     NSButton *ok = [NSButton buttonWithTitle:@"Assign" target:NSApp action:@selector(stopModal)];

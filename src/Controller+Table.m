@@ -40,9 +40,10 @@
     }
 
     if (t == self.appTable && row == 0) {
-        // a bit larger than the default symbol size
+        // the image view only scales down, so size the symbol to roughly match the
+        // visible artwork of a 22pt app icon (which has ~10% built-in margin)
         cell.imageView.image = [[NSImage imageWithSystemSymbolName:@"square.grid.2x2" accessibilityDescription:nil]
-            imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:16 weight:NSFontWeightRegular]];
+            imageWithSymbolConfiguration:[NSImageSymbolConfiguration configurationWithPointSize:19 weight:NSFontWeightRegular]];
         cell.textField.stringValue = @"All Apps";
         cell.textField.font = [NSFont systemFontOfSize:0];
         cell.toolTip = @"Every extension claimed by any app";
